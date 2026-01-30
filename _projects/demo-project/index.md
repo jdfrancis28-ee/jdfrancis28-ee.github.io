@@ -305,6 +305,6 @@ The microcontroller implementation emerged as the most practical choice for real
 
 ---
 
-*Project completed as part of [Course Name] at Morgan State University, Fall 2025*
+*Project completed as part of EE 200 Design Tools at Penn State University, Spring 2024*
 
 
