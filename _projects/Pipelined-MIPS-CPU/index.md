@@ -546,4 +546,4 @@ The combination of forwarding and selective stalling achieves near-ideal pipelin
 
 ---
 
-*Project completed as part of Computer Architecture coursework at Morgan State University, Fall 2024. Successfully synthesized and deployed to Xilinx XC7Z010 FPGA.*
+*Project completed as part of Computer Organization and Design coursework at Penn State University, Fall 2025. Successfully synthesized and deployed to Xilinx XC7Z010 FPGA.*
