@@ -832,4 +832,4 @@ The complete development cycle from Verilog HDL through Vivado synthesis, implem
 
 ---
 
-*Project completed as part of Computer Organization and Design coursework at Morgan State University, Fall 2025. Successfully synthesized and deployed to Xilinx XC7Z010 FPGA.*
+*Project completed as part of Computer Organization and Design coursework at Penn State University, Fall 2025. Successfully synthesized and deployed to Xilinx XC7Z010 FPGA.*
