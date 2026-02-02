@@ -742,7 +742,6 @@ endmodule
 
 **6. Hardware Validation** — Design programmed onto XC7Z010 FPGA and verified on physical hardware.
 
-### Implementation Results
 
 ### Implementation Results
 
@@ -755,8 +754,6 @@ endmodule
 ---
 
 ## Simulation Results
-
-### Waveform Analysis
 
 ### Waveform Analysis
 
