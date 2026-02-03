@@ -757,7 +757,7 @@ endmodule
 
 ### Waveform Analysis
 
-![CPU Pipeline Waveform](./assets/images/projects/cpu-waveform.png)
+![CPU Pipeline Waveform](/assets/projects/cpu-waveform.png)
 
 **Key Observations:**
 - Pipeline fills over first 5 clock cycles as instructions progress through stages
