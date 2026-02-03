@@ -757,7 +757,7 @@ endmodule
 
 ### Waveform Analysis
 
-![CPU Pipeline Waveform](/assets/projects/cpu-waveform.png)
+<img src="/assets/projects/cpu-waveform.png" alt="CPU Pipeline Waveform" style="width: 100%; max-width: 1000px;">
 
 **Key Observations:**
 - Pipeline fills over first 5 clock cycles as instructions progress through stages
