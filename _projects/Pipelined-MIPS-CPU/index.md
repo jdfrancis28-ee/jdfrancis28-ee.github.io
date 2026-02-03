@@ -12,7 +12,7 @@ skills:
   - Xilinx Vivado
   - Hardware Verification
   - RTL Design
-main-image: /fpga-pipelined-cpu.png
+main-image: ./assets/images/projects/fpga-pipelined-cpu.png
 ---
 
 ## Project Overview
@@ -745,11 +745,11 @@ endmodule
 
 ### Implementation Results
 
-![FPGA Synthesis Schematic](fpga-synthesis-schematic.png)
+![FPGA Synthesis Schematic](./assets/images/projects/fpga-synthesis-schematic.png)
 
-![FPGA I/O Planning](fpga-io-planning.png)
+![FPGA I/O Planning](./assets/images/projects/fpga-io-planning.png)
 
-![FPGA Floor Planning](fpga-floor-planning.png)
+![FPGA Floor Planning](./assets/images/projects/fpga-floor-planning.png)
 
 ---
 
@@ -757,7 +757,7 @@ endmodule
 
 ### Waveform Analysis
 
-![CPU Pipeline Waveform](cpu-waveform.png)
+![CPU Pipeline Waveform](./assets/images/projects/cpu-waveform.png)
 
 **Key Observations:**
 - Pipeline fills over first 5 clock cycles as instructions progress through stages
