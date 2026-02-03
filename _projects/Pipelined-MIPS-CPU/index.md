@@ -745,11 +745,11 @@ endmodule
 
 ### Implementation Results
 
-![FPGA Synthesis Schematic](./assets/images/projects/fpga-synthesis-schematic.png)
+![FPGA Synthesis Schematic](/assets/projects/fpga-synthesis-schematic.png)
 
-![FPGA I/O Planning](./assets/images/projects/fpga-io-planning.png)
+![FPGA I/O Planning](/assets/projects/fpga-io-planning.png)
 
-![FPGA Floor Planning](./assets/images/projects/fpga-floor-planning.png)
+![FPGA Floor Planning](/assets/projects/fpga-floor-planning.png)
 
 ---
 
