@@ -12,7 +12,7 @@ skills:
   - Xilinx Vivado
   - Hardware Verification
   - RTL Design
-main-image: ./assets/images/projects/fpga-pipelined-cpu.png
+main-image: /assets/projects/fpga-pipelined-cpu.png
 ---
 
 ## Project Overview
