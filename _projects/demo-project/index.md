@@ -281,10 +281,10 @@ int main(void) {
         __delay_ms(50);         // 50ms debounce delay
     }
 }
+
 void __attribute__((__interrupt__, auto_psv)) _INT1Interrupt(void) {
     if(debounceCounter == 0) {
         debounceCounter = 5;  // 50ms debounce
-        
         switch(currentState) {
             case STATE_ALL_LOCKED:
                 currentState = STATE_DRIVER_UNLOCKED;
@@ -305,10 +305,10 @@ void __attribute__((__interrupt__, auto_psv)) _INT1Interrupt(void) {
     
     IFS1bits.INT1IF = 0;  // Clear interrupt flag
 }
+
 void __attribute__((__interrupt__, auto_psv)) _T1Interrupt(void) {
     if(unlockTimeout > 0) {
         unlockTimeout--;
-        
         // Timeout expired in State 1 → return to locked
         if(unlockTimeout == 0 && currentState == STATE_DRIVER_UNLOCKED) {
             currentState = STATE_ALL_LOCKED;
@@ -320,6 +320,7 @@ void __attribute__((__interrupt__, auto_psv)) _T1Interrupt(void) {
     IFS0bits.T1IF = 0;
 }
 Output Control:
+
 void update_outputs(void) {
     switch(currentState) {
         case STATE_ALL_LOCKED:
