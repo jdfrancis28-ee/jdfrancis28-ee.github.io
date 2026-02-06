@@ -623,7 +623,7 @@ Understanding when to use discrete logic (education, ultra-low latency), CPLDs (
 
 ---
 
-*Project completed as part of EE 200 - Digital Logic Design at Morgan State University, Spring 2024.*
+*Project completed as part of EE 200 - Digital Logic Design at Penn State University, Spring 2024.*
 ```
 
 
