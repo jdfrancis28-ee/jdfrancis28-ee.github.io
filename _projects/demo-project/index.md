@@ -59,7 +59,310 @@ This project implements an automotive-style keyless entry system using four fund
 ---
 
 ## State Diagram
+                ┌─────────────┐
+         ┌──────┤   State 0   │◄──────┐
+         │      │ All Locked  │       │ Lock (L)
+         │      │ DD=0 AD=0   │       │ pressed
+         │      └──────┬──────┘       │
+         │             │              │
+         │        Unlock (U)          │
+         │        pressed             │
+         │             │              │
+         │             ▼              │
+         │      ┌─────────────┐       │
+         │      │   State 1   │───────┤
+         │      │Driver Unlock│       │
+         │      │ DD=1 AD=0   │       │
+         │      └──────┬──────┘       │
+         │             │              │
+         │        Unlock (U)          │
+         │        pressed again       │
+         │      (within 3s timeout)   │
+         │             │              │
+         │             ▼              │
+         │      ┌─────────────┐       │
+         │      │   State 2   │───────┤
+         │      │ All Unlocked│       │
+         │      │ DD=1 AD=1   │       │
+         │      └──────┬──────┘       │
+         │             │              │
+         │        Side Door (S)       │
+         │        opens               │
+         │             │              │
+         │             ▼              │
+         │      ┌─────────────┐       │
+         └─────▶│   State 3   │───────┘
+                │Side Door Opn│
+                │  DD=1 AD=1  │
+                │    SD=1     │
+                └─────────────┘
 
+---
+
+## Implementation 1: Discrete Logic (NAND Gates + D Flip-Flops)
+
+### Design Approach
+
+Pure combinational and sequential logic using 7400-series integrated circuits. State encoding implemented with D flip-flops, next-state logic built from NAND gates following Boolean minimization.
+
+### Hardware Components
+
+- **74HC00** Quad 2-input NAND gates (for next-state logic)
+- **74HC74** Dual D flip-flops (for state register)
+- Discrete resistors, LEDs, pushbuttons
+
+### Truth Table for Next-State Logic
+
+| Current State | Lock | Unlock | Side Door | Next State | Implementation |
+|---------------|------|--------|-----------|------------|----------------|
+| S0 (00)       | X    | 1      | X         | S1 (01)    | NAND logic for D1, D0 inputs |
+| S1 (01)       | 1    | X      | X         | S0 (00)    | Reset flip-flops |
+| S1 (01)       | 0    | 1      | X         | S2 (10)    | Set D1, clear D0 |
+| S2 (10)       | 0    | X      | 1         | S3 (11)    | Set both flip-flops |
+
+### Circuit Schematic
+
+![Discrete Logic Circuit](/assets/projects/discrete-logic-circuit.png)
+
+### Advantages
+
+✅ **Fastest response** - Pure hardware, <10ns propagation delay  
+✅ **Deterministic** - No software timing issues  
+✅ **Educational** - Teaches fundamental digital logic  
+✅ **No programming** - Just wire connections  
+
+### Disadvantages
+
+❌ **Zero flexibility** - Any change requires complete rewiring  
+❌ **Large footprint** - Multiple ICs on breadboard  
+❌ **Difficult debugging** - Must probe signals with oscilloscope  
+❌ **Error-prone wiring** - Easy to make connection mistakes  
+
+### Performance Metrics
+
+| Metric | Value |
+|--------|-------|
+| Response Time | <10 ns |
+| Power Consumption | ~100 mW |
+| Component Count | 5-7 ICs + passives |
+| Cost | $10-15 |
+| Development Time | 2-3 days |
+
+---
+
+## Implementation 2: LabVIEW/myDAQ
+
+### Design Approach
+
+Graphical state machine programming using LabVIEW's built-in state diagram tools. NI myDAQ provides digital I/O for button inputs and LED outputs.
+
+### LabVIEW VI Structure
+
+**State Machine Loop:**
+- Event structure monitors button presses
+- Case structure implements state transitions
+- Shift registers maintain current state
+- Timeout timer manages 3-second unlock window
+
+### Block Diagram
+
+![LabVIEW Block Diagram](/assets/projects/labview-block-diagram.png)
+
+### Key LabVIEW Features Used
+
+**Digital I/O:**
+- `DAQmx Create Channel` - Configure DIO lines
+- `DAQmx Read` - Read button states
+- `DAQmx Write` - Control LED outputs
+
+**State Machine:**
+- Enum for state encoding (S0, S1, S2, S3)
+- Case structure for state-specific logic
+- Event structure for button press handling
+
+### Code Snippet (Pseudo-LabVIEW)
+
+Initialize:
+	∙	Set state = S0
+	∙	Configure myDAQ DIO channels
+	∙	Start timeout timer
+Main Loop:
+Case (current_state):
+S0: If unlock_pressed → state = S1, start 3s timer
+S1: If lock_pressed → state = S0
+If unlock_pressed AND timer_active → state = S2
+If timer_expired → state = S0
+S2: If lock_pressed → state = S0
+If side_door_open → state = S3
+S3: If lock_pressed → state = S0
+If side_door_closed → state = S2
+Update LED outputs based on state
+
+### Advantages
+
+✅ **Rapid prototyping** - Drag-and-drop programming  
+✅ **Excellent debugging** - Real-time probes and indicators  
+✅ **Easy modification** - Change logic without rewiring  
+✅ **Built-in visualization** - See state transitions in real-time  
+
+### Disadvantages
+
+❌ **Not standalone** - Requires PC connection  
+❌ **High cost** - LabVIEW license + myDAQ (~$200-300)  
+❌ **Not production-viable** - Cannot deploy to embedded system  
+❌ **Power hungry** - PC must remain powered on  
+
+### Performance Metrics
+
+| Metric | Value |
+|--------|-------|
+| Response Time | ~1 ms (software loop) |
+| Power Consumption | High (PC-dependent) |
+| Component Count | myDAQ + PC |
+| Cost | $200-300 |
+| Development Time | 4-6 hours |
+
+---
+
+## Implementation 3: Microcontroller (dsPIC33EP + Embedded C)
+
+### Hardware Platform
+
+**Microcontroller:** Microchip dsPIC33EP64MC502 (28-pin DIP)
+- 16-bit DSC with 64KB flash, 16KB RAM
+- Operating at 3.685 MHz (internal FRC oscillator with PLL)
+- Interrupt-driven architecture for responsive button handling
+
+**Peripherals:**
+- HD44780-compatible 16x2 LCD display for state feedback
+- 3× pushbuttons (Lock, Unlock, Side Door simulation)
+- 3× status LEDs (DD, AD, SD outputs)
+
+### Pin Connections
+
+| Pin  | Function | Connection |
+|------|----------|------------|
+| RB8  | Lock Button | Active low, internal pull-up enabled |
+| RB9  | Unlock Button (INT1) | Active low, interrupt-driven |
+| RB10 | Side Door Sensor | Active low, polled in main loop |
+| RB11 | Driver Door LED (DD) | Active high output |
+| RB12 | All Doors LED (AD) | Active high output |
+| RB13 | Side Door LED (SD) | Active high output |
+| RB14-RB15 | LCD Data (D4-D5) | 4-bit mode |
+| RA0  | LCD RS | Register select |
+| RA1  | LCD EN | Enable strobe |
+
+### Software Architecture
+
+**State Machine Implementation:**
+
+typedef enum {
+    STATE_ALL_LOCKED = 0,      // S0: DD=0, AD=0, SD=0
+    STATE_DRIVER_UNLOCKED = 1, // S1: DD=1, AD=0, SD=0
+    STATE_ALL_UNLOCKED = 2,    // S2: DD=1, AD=1, SD=0
+    STATE_SIDE_DOOR_OPEN = 3   // S3: DD=1, AD=1, SD=1
+} SystemState;
+
+volatile SystemState currentState = STATE_ALL_LOCKED;
+volatile unsigned int unlockTimeout = 0;  // Timer ticks (10ms each)
+
+int main(void) {
+    initialize_IO_ports();      // Configure pins, pull-ups
+    initialize_timer();         // Timer1: 10ms periodic interrupt
+    init_LCD_module();          // LCD initialization sequence
+    initialize_interrupts();    // INT1 for unlock button
+    
+    currentState = STATE_ALL_LOCKED;
+    update_outputs();           // Set initial LED states
+    display_state(currentState); // Show "State: S0 All Locked"
+    
+    while(1) {
+        process_buttons();      // Poll lock button & side door
+        __delay_ms(50);         // 50ms debounce delay
+    }
+}
+void __attribute__((__interrupt__, auto_psv)) _INT1Interrupt(void) {
+    if(debounceCounter == 0) {
+        debounceCounter = 5;  // 50ms debounce
+        
+        switch(currentState) {
+            case STATE_ALL_LOCKED:
+                currentState = STATE_DRIVER_UNLOCKED;
+                unlockTimeout = 300;  // 3 seconds (300 × 10ms)
+                break;
+                
+            case STATE_DRIVER_UNLOCKED:
+                if(unlockTimeout > 0) {  // Within timeout window
+                    currentState = STATE_ALL_UNLOCKED;
+                    unlockTimeout = 0;
+                }
+                break;
+        }
+        
+        update_outputs();
+        display_state(currentState);
+    }
+    
+    IFS1bits.INT1IF = 0;  // Clear interrupt flag
+}
+void __attribute__((__interrupt__, auto_psv)) _T1Interrupt(void) {
+    if(unlockTimeout > 0) {
+        unlockTimeout--;
+        
+        // Timeout expired in State 1 → return to locked
+        if(unlockTimeout == 0 && currentState == STATE_DRIVER_UNLOCKED) {
+            currentState = STATE_ALL_LOCKED;
+            update_outputs();
+            display_state(currentState);
+        }
+    }
+    
+    IFS0bits.T1IF = 0;
+}
+Output Control:
+void update_outputs(void) {
+    switch(currentState) {
+        case STATE_ALL_LOCKED:
+            DRIVER_DOOR_LED = 0;  // DD = 0
+            ALL_DOORS_LED = 0;    // AD = 0
+            SIDE_DOOR_LED = 0;    // SD = 0
+            break;
+            
+        case STATE_DRIVER_UNLOCKED:
+            DRIVER_DOOR_LED = 1;  // DD = 1
+            ALL_DOORS_LED = 0;    // AD = 0
+            SIDE_DOOR_LED = 0;    // SD = 0
+            break;
+            
+        case STATE_ALL_UNLOCKED:
+            DRIVER_DOOR_LED = 1;  // DD = 1
+            ALL_DOORS_LED = 1;    // AD = 1
+            SIDE_DOOR_LED = 0;    // SD = 0
+            break;
+            
+        case STATE_SIDE_DOOR_OPEN:
+            DRIVER_DOOR_LED = 1;  // DD = 1
+            ALL_DOORS_LED = 1;    // AD = 1
+            SIDE_DOOR_LED = 1;    // SD = 1
+            break;
+    }
+}
+Circuit Schematic:
+Advantages
+✅ Most flexible - Easy firmware updates via USB programmer✅ Lowest cost - $5-10 for complete solution✅ Smallest footprint - Single 28-pin chip✅ Feature-rich - Can add UART logging, EEPROM storage, encryption✅ Low power - Sleep modes available (<1mW idle)
+Disadvantages
+❌ Requires programming - C knowledge necessary❌ Software bugs possible - Unlike pure hardware❌ Slower response - ~100μs vs <10ns for discrete logic❌ Development tools - Need MPLAB X IDE and PICkit programmer
+Performance Metrics
+
+Implementation 4: CPLD (ATF750C + WinCUPL)
+Hardware Platform
+CPLD: Atmel ATF750C-10JC (44-pin PLCC)
+	∙	128 macrocells, 10ns propagation delay
+	∙	In-system programmable via JTAG
+External Timer: CD4541BE CMOS Programmable Timer
+	∙	Provides 3-second timeout for unlock sequence
+	∙	RC time constant: R=1MΩ, C=3.3μF
+WinCUPL State Machine Code
 
 
 
