@@ -379,6 +379,9 @@ void update_outputs(void) {
 
 ![Microcontroller Circuit](/assets/projects/microcontroller-circuit.png)
 
+### Circuit Realization
+![Microcontroller Circuit](/assets/projects/CircuitFSM.png)
+
 ### Advantages
 
 ✅ **Most flexible** - Easy firmware updates via USB programmer  
@@ -596,22 +599,6 @@ Real engineering requires matching technology to requirements, not defaulting to
 - Raspberry Pi with GUI (touchscreen interface)
 - ESP32 with WiFi/Bluetooth remote control
 
----
-
-## Project Files
-
-**GitHub Repository:** [github.com/jdfrancis28-ee/fsm-keyless-entry-system](https://github.com/jdfrancis28-ee/fsm-keyless-entry-system)
-
-**Repository Contents:**
-- Complete embedded C source code (MPLAB X project)
-- WinCUPL CPLD source code (.PLD file)
-- LabVIEW VI files (graphical code)
-- Multisim schematic (discrete logic)
-- Hardware schematics (all implementations)
-- Bill of materials (BOM)
-- Test procedures and validation data
-
----
 
 ## Conclusion
 
