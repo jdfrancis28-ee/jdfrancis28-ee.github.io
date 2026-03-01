@@ -17,16 +17,14 @@ main-image: /fpga-pipelined-cpu.png
 
 ## Project Overview
 
-This project implements a complete 5-stage pipelined CPU based on the MIPS instruction set architecture, demonstrating fundamental concepts of modern processor design including instruction-level parallelism, hazard detection, and data forwarding mechanisms.
-
-**Design Goal:** Build a functional pipelined processor that executes MIPS instructions with minimal stalls
+This project implements a complete 5-stage pipelined MIPS processor in Verilog, covering the full development cycle from RTL design through simulation, synthesis, and deployment on a Xilinx FPGA. The design handles data hazards through forwarding and selective stalling, and structural hazards through separate instruction and data memories.
 
 **Key Features:**
 - Classic 5-stage pipeline (IF, ID, EX, MEM, WB)
 - Data forwarding to minimize pipeline stalls
 - Load-use hazard detection and stalling
 - Separate instruction and data memories
-- Successfully synthesized and deployed to Xilinx FPGA
+- Successfully synthesized and deployed to Xilinx XC7Z010 FPGA
 
 ---
 
@@ -35,8 +33,8 @@ This project implements a complete 5-stage pipelined CPU based on the MIPS instr
 ### The Five Stages
 
 **1. Instruction Fetch (IF)**
-- Program Counter (PC) maintains current instruction address, initialized to address 100
-- Instruction memory fetches 32-bit instruction at PC
+- Program Counter (PC) maintains the current instruction address, initialized to address 100
+- Instruction memory fetches the 32-bit instruction at PC
 - PC incremented by 4 each cycle for word-aligned addressing
 
 **2. Instruction Decode (ID)**
@@ -62,7 +60,7 @@ This project implements a complete 5-stage pipelined CPU based on the MIPS instr
 
 ```
 ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
-│   IF    │───▶│   ID    │───▶│   EX    │───▶│   MEM   │───▶│   WB    │
+│   IF    │───>│   ID    │───>│   EX    │───>│   MEM   │───>│   WB    │
 │ Fetch   │    │ Decode  │    │ Execute │    │ Memory  │    │ Write   │
 └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
      │              │              │              │              │
@@ -72,16 +70,16 @@ This project implements a complete 5-stage pipelined CPU based on the MIPS instr
 
 ---
 
-## Hazard Handling Implementation
+## Hazard Handling
 
 ### Data Hazards
 
 **Problem:** Subsequent instructions may need data before it has been written back to the register file.
 
-**Example Hazard:**
+**Example:**
 ```assembly
 add $3, $1, $2    # $3 = $1 + $2 (result ready after EX stage)
-sub $4, $9, $3    # Needs $3 immediately (not yet written back!)
+sub $4, $9, $3    # Needs $3 immediately (not yet written back)
 ```
 
 ### Solution 1: Data Forwarding
@@ -136,59 +134,57 @@ end
 endmodule
 ```
 
-**Result:** Eliminates most data hazards without any pipeline stalls. Forwarding logic is applied independently to both operand A (rs) and operand B (rt).
+Forwarding logic is applied independently to both operand A (rs) and operand B (rt), eliminating most data hazards without any pipeline stalls.
 
 ---
 
 ### Solution 2: Pipeline Stalling
 
-For load-use hazards, forwarding alone is not sufficient because memory data is unavailable until the end of the MEM stage. The pipeline must stall for one cycle to allow the data to propagate.
+For load-use hazards, forwarding alone is not sufficient because memory data is unavailable until the end of the MEM stage. The pipeline must stall for one cycle.
 
 **Load-Use Hazard Example:**
 ```assembly
 lw  $3, 0($1)     # Load $3 from memory (data ready end of MEM)
-add $4, $3, $5    # Needs $3 in EX (one cycle too early!)
+add $4, $3, $5    # Needs $3 in EX (one cycle too early)
 ```
 
 **Stalling Logic (Verilog):**
 ```verilog
-// Detect load-use hazard: EX stage contains load and current instruction reads that register
+// Detect load-use hazard
 if ((ewreg == 1'b1) && (em2reg == 1'b1) && (edestReg != 5'b0) && 
     ((edestReg == rs) || (edestReg == rt))) begin
-    wreg = 1'b0;    // Convert current instruction to NOP
-    wmem = 1'b0;
-    wpcir = 1'b0;   // Freeze PC and IF/ID register for one cycle
+    wreg  = 1'b0;    // Convert current instruction to NOP
+    wmem  = 1'b0;
+    wpcir = 1'b0;    // Freeze PC and IF/ID register for one cycle
 end
 else begin
-    wpcir = 1'b1;   // Normal operation - advance pipeline
+    wpcir = 1'b1;    // Normal operation - advance pipeline
 end
 ```
 
-**How it works:** When a load-use hazard is detected, the Control Unit sets `wpcir` to 0, which simultaneously freezes the Program Counter and the IF/ID pipeline register. The ID/EX register receives a bubble (NOP) for one cycle, allowing the load data to reach the MEM/WB stage where it can then be forwarded.
+When a load-use hazard is detected, the Control Unit sets `wpcir` to 0, freezing both the Program Counter and the IF/ID pipeline register. The ID/EX register receives a bubble (NOP) for one cycle, allowing the load data to reach the MEM/WB stage where it can then be forwarded.
 
 ---
 
 ### Structural Hazards
 
-**Problem:** Multiple instructions competing for the same hardware resource simultaneously.
-
-**Solution:** Instruction and data memories are implemented as completely separate modules. The IF stage reads from instruction memory while the MEM stage reads/writes data memory in the same cycle with no conflicts.
+Instruction and data memories are implemented as completely separate modules, so the IF stage and MEM stage can both access memory in the same cycle without conflict.
 
 ---
 
 ## Control Unit Design
 
-The Control Unit is the most complex module in the design, responsible for decoding instructions, generating all control signals, detecting hazards, and computing forwarding paths.
+The Control Unit decodes instructions, generates all control signals, detects hazards, and computes forwarding paths.
 
-### Control Signals Generated
+### Control Signals
 
 | Signal | Purpose | Values |
 |--------|---------|--------|
 | `wreg` | Write register enable | 1 = write result to register file |
-| `m2reg` | Memory to register | 1 = load instruction (write memory data) |
+| `m2reg` | Memory to register | 1 = load instruction |
 | `wmem` | Write memory enable | 1 = store instruction |
 | `aluc[3:0]` | ALU operation select | 0010=ADD, 0110=SUB, 0000=AND, 0001=OR, 1110=XOR |
-| `aluimm` | ALU operand B select | 1 = use sign-extended immediate, 0 = use register |
+| `aluimm` | ALU operand B select | 1 = use immediate, 0 = use register |
 | `regrt` | Destination register select | 1 = rt (I-type), 0 = rd (R-type) |
 | `fwda[1:0]` | Forward control for operand A | Source selection for rs |
 | `fwdb[1:0]` | Forward control for operand B | Source selection for rt |
@@ -222,11 +218,11 @@ module ControlUnit(
 always @(*) begin
     case (op)
         6'b000000: begin    // R-type instructions
-            wreg = 1'b1;
-            m2reg = 1'b0;
-            wmem = 1'b0;
+            wreg   = 1'b1;
+            m2reg  = 1'b0;
+            wmem   = 1'b0;
             aluimm = 1'b0;
-            regrt = 1'b0;   // Write to rd
+            regrt  = 1'b0;  // Write to rd
 
             case (func)
                 6'b100000: aluc = 4'b0010;  // ADD
@@ -238,12 +234,12 @@ always @(*) begin
         end
 
         6'b100011: begin    // LW - Load Word
-            wreg = 1'b1;
-            m2reg = 1'b1;
-            wmem = 1'b0;
-            aluc = 4'b0010;
+            wreg   = 1'b1;
+            m2reg  = 1'b1;
+            wmem   = 1'b0;
+            aluc   = 4'b0010;
             aluimm = 1'b1;
-            regrt = 1'b1;   // Write to rt
+            regrt  = 1'b1;  // Write to rt
         end
     endcase
 end
@@ -266,12 +262,12 @@ module ProgramCounter(
 );
 
 initial begin
-    PC = 32'd100;   // Start at address 100
+    PC = 32'd100;
 end
 
 always @(posedge clk) begin
     if (wpcir == 1'b1)
-        PC <= nextPC;   // Only update when not stalled
+        PC <= nextPC;
 end
 
 endmodule
@@ -286,7 +282,7 @@ module PCAdder(
 );
 
 always @(*) begin
-    nextPC = PC + 32'd4;    // Word-aligned increment
+    nextPC = PC + 32'd4;
 end
 
 endmodule
@@ -311,7 +307,7 @@ initial begin
 end
 
 always @(*) begin
-    instOut = instMemory[PC[31:2]];  // Word-aligned access (PC / 4)
+    instOut = instMemory[PC[31:2]];
 end
 
 endmodule
@@ -329,7 +325,7 @@ module IFIDReg(
 
 always @(posedge clk) begin
     if (wpcir == 1'b1)
-        dinstOut <= instOut;    // Holds value when stalled
+        dinstOut <= instOut;
 end
 
 endmodule
@@ -365,13 +361,11 @@ initial begin
     regfile[10] = 32'h90000099;
 end
 
-// Asynchronous dual-port read
 always @(*) begin
     qa = regfile[rs];
     qb = regfile[rt];
 end
 
-// Synchronous write on negative edge
 always @(negedge clk) begin
     if (wwreg == 1'b1)
         regfile[wdestReg] <= wbData;
@@ -389,7 +383,7 @@ module ImmExtender(
 );
 
 always @(*) begin
-    imm32 = {{16{imm[15]}}, imm[15:0]};  // Sign extend bit 15 to 32 bits
+    imm32 = {{16{imm[15]}}, imm[15:0]};
 end
 
 endmodule
@@ -439,9 +433,9 @@ module ALUMux(
 
 always @(*) begin
     if (ealuimm == 1'b0)
-        b = eqb;        // R-type: use register value
+        b = eqb;
     else
-        b = eimm32;     // I-type: use immediate
+        b = eimm32;
 end
 
 endmodule
@@ -521,12 +515,10 @@ initial begin
     DataMem[9] = 32'h90000099;
 end
 
-// Asynchronous read
 always @(*) begin
     mdo = DataMem[mr[31:2]];
 end
 
-// Synchronous write on negative edge
 always @(negedge clk) begin
     if (mwmem == 1'b1)
         DataMem[mr] <= mqb;
@@ -571,9 +563,9 @@ module WBMux(
 
 always @(*) begin
     if (wm2reg == 1'b0)
-        wbData = wr;    // ALU result
+        wbData = wr;
     else
-        wbData = wdo;   // Memory data (load)
+        wbData = wdo;
 end
 
 endmodule
@@ -591,9 +583,9 @@ module RegrtMux(
 
 always @(*) begin
     if (regrt == 1'b0)
-        destReg = rd;   // R-type: destination is rd
+        destReg = rd;
     else
-        destReg = rt;   // I-type: destination is rt
+        destReg = rt;
 end
 
 endmodule
@@ -602,8 +594,6 @@ endmodule
 ---
 
 ## Top-Level Module
-
-The main module instantiates and wires all components across the five pipeline stages:
 
 ```verilog
 module FinalProject(
@@ -623,7 +613,6 @@ module FinalProject(
     output [31:0] wr, wdo
 );
 
-// Internal wires
 wire [31:0] nextPC, instOut, imm32, ra, rb, r, mdo, qa, qb, b, wbData;
 wire wpcir, wreg, m2reg, wmem, aluimm, regrt;
 wire [3:0] aluc;
@@ -673,10 +662,10 @@ The CPU executes a 5-instruction test program that exercises forwarding between 
 
 ```assembly
 add $3, $1, $2    # $3 = 0xA00000AA + 0x10000011 = 0xB00000BB
-sub $4, $9, $3    # $4 = $9 - $3  → triggers forwarding from previous ADD
-or  $5, $3, $9    # $5 = $3 | $9  → triggers forwarding
-xor $6, $3, $9    # $6 = $3 ^ $9  → triggers forwarding
-and $7, $3, $9    # $7 = $3 & $9  → triggers forwarding
+sub $4, $9, $3    # $4 = $9 - $3  (forwarding from ADD)
+or  $5, $3, $9    # $5 = $3 | $9  (forwarding)
+xor $6, $3, $9    # $6 = $3 ^ $9  (forwarding)
+and $7, $3, $9    # $7 = $3 & $9  (forwarding)
 ```
 
 ### Testbench
@@ -730,18 +719,17 @@ endmodule
 
 ### Development Workflow
 
-**1. RTL Design** — Implemented each pipeline stage as an independent Verilog module with clear interfaces between stages.
+**1. RTL Design** — Each pipeline stage implemented as an independent Verilog module with clean interfaces between stages.
 
-**2. Simulation & Verification** — Developed testbench to drive clock and monitor all pipeline register outputs across every stage. Validated instruction execution and forwarding behavior via waveform analysis.
+**2. Simulation** — Testbench used to drive the clock and monitor all pipeline register outputs across every stage. Forwarding behavior verified via waveform analysis in ModelSim.
 
-**3. Synthesis** — Converted RTL Verilog to gate-level netlist using Xilinx Vivado. Design schematic generated post-synthesis confirms correct module hierarchy.
+**3. Synthesis** — RTL converted to gate-level netlist using Xilinx Vivado. Post-synthesis schematic confirms correct module hierarchy.
 
-**4. Implementation** — Mapped synthesized netlist to physical FPGA resources. I/O planning and floor planning completed successfully.
+**4. Implementation** — Synthesized netlist mapped to physical FPGA resources. I/O planning and floor planning completed successfully.
 
-**5. Bitstream Generation** — Bitstream generated successfully, confirming design is ready for hardware deployment.
+**5. Bitstream Generation** — Bitstream generated successfully, confirming timing closure and resource feasibility.
 
-**6. Hardware Validation** — Design programmed onto XC7Z010 FPGA and verified on physical hardware.
-
+**6. Hardware Validation** — Design programmed onto XC7Z010 and verified on physical hardware using JTAG debugging.
 
 ### Implementation Results
 
@@ -755,12 +743,10 @@ endmodule
 
 ## Simulation Results
 
-### Waveform Analysis
-
 <img src="/assets/projects/cpu-waveform.png" alt="CPU Pipeline Waveform" style="width: 100%; max-width: 1000px;">
 
 **Key Observations:**
-- Pipeline fills over first 5 clock cycles as instructions progress through stages
+- Pipeline fills over the first 5 clock cycles as instructions enter each stage
 - Forwarding control signals (fwda, fwdb) activate automatically when data hazards are detected
 - All 5 instructions complete with correct results
 - Register file updates reflect expected computed values
@@ -769,64 +755,17 @@ endmodule
 
 ## Lessons Learned
 
-### Technical Insights
-
 **Pipeline Design:**
-- Separating control logic and data paths simplifies verification and debugging
-- Pipeline registers are critical — they define stage boundaries and enable parallelism
-- Hazard detection logic in the Control Unit adds significant complexity but is essential for correctness
+Separating control logic and data paths made verification significantly more manageable. Pipeline registers define stage boundaries cleanly and the modular structure made it straightforward to isolate and fix bugs during simulation before moving to hardware.
 
-**Verilog Best Practices:**
-- Modular design with one module per component makes debugging tractable
-- Consistent signal naming across pipeline stages prevents wiring errors
-- Comments clarifying intent (not just syntax) are essential for complex control logic
+**Hazard Handling:**
+Forwarding eliminates the majority of data hazard stalls but adds multiplexer delays in the critical path. The throughput improvement is well worth the tradeoff. Load-use stalling required careful coordination between the Control Unit, the PC register, and the IF/ID register to insert a clean bubble without corrupting pipeline state.
 
 **FPGA Development:**
-- Simulation catches the majority of bugs before synthesis — invest time here
-- Successful bitstream generation confirms timing closure and resource feasibility
-- Separating memories eliminates an entire class of structural hazard problems
-
-### Engineering Trade-offs
-
-**Performance vs. Complexity:**
-Forwarding eliminates most data hazard stalls but introduces additional multiplexer delays in the critical path. The trade-off is worthwhile — throughput improvement far outweighs the small increase in cycle time.
-
-**Modular vs. Monolithic Design:**
-Breaking the CPU into 15+ independent modules made development and debugging significantly more manageable compared to a single large module, at the cost of more interconnect wiring.
-
----
-
-## Future Enhancements
-
-**Near-Term:**
-1. Branch prediction to reduce control hazard penalties
-2. Expanded instruction set (shift, jump, and branch instructions)
-3. Exception and interrupt handling
-
-**Advanced:**
-4. Instruction and data caches to reduce memory latency
-5. Out-of-order execution for higher IPC
-6. Multi-cycle instructions (multiply, divide)
-7. Superscalar architecture with multiple issue slots
-
----
-
-## Project Files
-
-**GitHub Repository:** [github.com/jacobfrancis/fpga-pipelined-mips-cpu](https://github.com/yourusername/fpga-pipelined-mips-cpu)
-
-**Files Included:**
-- Complete Verilog source code (all modules)
-- Testbench
-- Synthesis and implementation screenshots
-- Architecture documentation
-- Quick start guide
+Simulation caught most bugs before synthesis. Investing time in a thorough testbench before touching Vivado saved significant debugging time during implementation.
 
 ---
 
 ## Conclusion
 
-This project implements a fully functional 5-stage pipelined MIPS processor from RTL design through FPGA deployment. The design successfully resolves data hazards through a combination of forwarding — which bypasses results directly between pipeline stages — and selective stalling for load-use cases where forwarding is insufficient. Separate instruction and data memories eliminate structural hazards entirely.
-
-The complete development cycle from Verilog HDL through Vivado synthesis, implementation, and bitstream generation demonstrates end-to-end FPGA design methodology. The modular architecture provides a strong foundation for future enhancements such as branch prediction and expanded instruction set support.
-
+This project implements a fully functional 5-stage pipelined MIPS processor from RTL design through FPGA deployment. Data hazards are resolved through forwarding and selective stalling, and structural hazards are eliminated through separate instruction and data memories. The complete development cycle from Verilog HDL through Vivado synthesis, implementation, and bitstream generation demonstrates end-to-end FPGA design methodology.
