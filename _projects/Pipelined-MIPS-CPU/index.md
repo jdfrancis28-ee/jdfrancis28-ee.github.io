@@ -830,6 +830,3 @@ This project implements a fully functional 5-stage pipelined MIPS processor from
 
 The complete development cycle from Verilog HDL through Vivado synthesis, implementation, and bitstream generation demonstrates end-to-end FPGA design methodology. The modular architecture provides a strong foundation for future enhancements such as branch prediction and expanded instruction set support.
 
----
-
-*Project completed as part of Computer Organization and Design coursework at Penn State University, Fall 2025. Successfully synthesized and deployed to Xilinx XC7Z010 FPGA.*
