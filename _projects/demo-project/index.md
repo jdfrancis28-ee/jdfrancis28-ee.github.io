@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Finite State Machine Keyless Entry System
-description: Comparative implementation study of automotive keyless entry system using four distinct approaches - discrete logic (NAND gates), LabVIEW/myDAQ, microcontroller (embedded C), and CPLD (WinCUPL) - demonstrating engineering tradeoffs in cost, power, size, and flexibility.
+description: Comparative implementation study of an automotive keyless entry system using four distinct approaches - discrete logic (NAND gates), LabVIEW/myDAQ, microcontroller (embedded C), and CPLD (WinCUPL) - demonstrating engineering tradeoffs in cost, power, size, and flexibility.
 skills: 
   - Digital Logic Design
   - Finite State Machines
@@ -13,14 +13,12 @@ skills:
   - Comparative Engineering Analysis
   - System-Level Design
   - Hardware Description Languages
-main-image: /assets/projects/CircuitFSM.png
+main-image: /assets/projects/discrete-logic-circuit.png
 ---
 
 ## Project Overview
 
-This project implements an automotive-style keyless entry system using four fundamentally different technologies, demonstrating the critical engineering tradeoffs between hardware simplicity, software flexibility, cost, power consumption, and development time.
-
-**Design Challenge:** Build the same keyless entry state machine four different ways to understand when to use each technology.
+This project implements an automotive keyless entry system four different ways — discrete logic, LabVIEW, embedded C on a microcontroller, and a CPLD — to study the engineering tradeoffs between each approach. The goal was not just to make the system work, but to understand when each technology is the right tool for the job.
 
 **Four Implementations:**
 1. **Discrete Logic** - NAND gates and D flip-flops (pure hardware)
@@ -46,13 +44,13 @@ This project implements an automotive-style keyless entry system using four fund
 
 ### State Machine Logic
 
-**State 0 (S0 - All Locked):** All doors locked → DD=0, AD=0, SD=0
+**State 0 (S0 - All Locked):** All doors locked. DD=0, AD=0, SD=0
 
-**State 1 (S1 - Driver Unlocked):** First unlock press unlocks driver's door → DD=1, AD=0, SD=0
+**State 1 (S1 - Driver Unlocked):** First unlock press unlocks driver's door. DD=1, AD=0, SD=0
 
-**State 2 (S2 - All Unlocked):** Second unlock press (within 3-second timeout) unlocks all doors → DD=1, AD=1, SD=0
+**State 2 (S2 - All Unlocked):** Second unlock press within 3-second timeout unlocks all doors. DD=1, AD=1, SD=0
 
-**State 3 (S3 - Side Door Open):** Side door sensor activates when door opens → DD=1, AD=1, SD=1
+**State 3 (S3 - Side Door Open):** Side door sensor activates when door opens. DD=1, AD=1, SD=1
 
 **Lock button:** Returns to State 0 from any state
 
@@ -104,9 +102,7 @@ This project implements an automotive-style keyless entry system using four fund
 
 ## Implementation 1: Discrete Logic (NAND Gates + D Flip-Flops)
 
-### Design Approach
-
-Pure combinational and sequential logic using 7400-series integrated circuits. State encoding implemented with D flip-flops, next-state logic built from NAND gates following Boolean minimization.
+The simplest approach at the hardware level. The state machine is built entirely from physical gates and flip-flops with no software involved, making it the fastest implementation but completely inflexible once wired.
 
 ### Hardware Components
 
@@ -155,9 +151,7 @@ Pure combinational and sequential logic using 7400-series integrated circuits. S
 
 ## Implementation 2: LabVIEW/myDAQ
 
-### Design Approach
-
-Graphical state machine programming using LabVIEW's built-in state diagram tools. NI myDAQ provides digital I/O for button inputs and LED outputs.
+LabVIEW allowed the state machine to be built graphically using drag-and-drop programming, making it the fastest to prototype and easiest to debug. However it requires a PC to run, making it unsuitable for any real deployment.
 
 ### LabVIEW VI Structure
 
@@ -233,6 +227,8 @@ Main Loop:
 
 ## Implementation 3: Microcontroller (dsPIC33EP + Embedded C)
 
+The most practical implementation for a real product. The dsPIC33EP runs the state machine in firmware, with a 16x2 LCD display showing the current state in real time for feedback and debugging. A single low-cost chip handles all inputs, outputs, timing, and display logic.
+
 ### Hardware Platform
 
 **Microcontroller:** Microchip dsPIC33EP64MC502 (28-pin DIP)
@@ -241,9 +237,9 @@ Main Loop:
 - Interrupt-driven architecture for responsive button handling
 
 **Peripherals:**
-- HD44780-compatible 16x2 LCD display for state feedback
-- 3× pushbuttons (Lock, Unlock, Side Door simulation)
-- 3× status LEDs (DD, AD, SD outputs)
+- HD44780-compatible 16x2 LCD display showing current state in real time
+- 3x pushbuttons (Lock, Unlock, Side Door simulation)
+- 3x status LEDs (DD, AD, SD outputs)
 
 ### Pin Connections
 
@@ -279,18 +275,18 @@ volatile unsigned int unlockTimeout = 0;  // Timer ticks (10ms each)
 
 ```c
 int main(void) {
-    initialize_IO_ports();      // Configure pins, pull-ups
-    initialize_timer();         // Timer1: 10ms periodic interrupt
-    init_LCD_module();          // LCD initialization sequence
-    initialize_interrupts();    // INT1 for unlock button
+    initialize_IO_ports();       // Configure pins, pull-ups
+    initialize_timer();          // Timer1: 10ms periodic interrupt
+    init_LCD_module();           // LCD initialization sequence
+    initialize_interrupts();     // INT1 for unlock button
     
     currentState = STATE_ALL_LOCKED;
-    update_outputs();           // Set initial LED states
-    display_state(currentState); // Show "State: S0 All Locked"
+    update_outputs();            // Set initial LED states
+    display_state(currentState); // LCD shows "State: S0 All Locked"
     
     while(1) {
-        process_buttons();      // Poll lock button & side door
-        __delay_ms(50);         // 50ms debounce delay
+        process_buttons();       // Poll lock button & side door
+        __delay_ms(50);          // 50ms debounce delay
     }
 }
 ```
@@ -305,7 +301,7 @@ void __attribute__((__interrupt__, auto_psv)) _INT1Interrupt(void) {
         switch(currentState) {
             case STATE_ALL_LOCKED:
                 currentState = STATE_DRIVER_UNLOCKED;
-                unlockTimeout = 300;  // 3 seconds (300 × 10ms)
+                unlockTimeout = 300;  // 3 seconds (300 x 10ms)
                 break;
                 
             case STATE_DRIVER_UNLOCKED:
@@ -331,7 +327,7 @@ void __attribute__((__interrupt__, auto_psv)) _T1Interrupt(void) {
     if(unlockTimeout > 0) {
         unlockTimeout--;
         
-        // Timeout expired in State 1 → return to locked
+        // Timeout expired in State 1 - return to locked
         if(unlockTimeout == 0 && currentState == STATE_DRIVER_UNLOCKED) {
             currentState = STATE_ALL_LOCKED;
             update_outputs();
@@ -380,6 +376,7 @@ void update_outputs(void) {
 ![Microcontroller Circuit](/assets/projects/microcontroller-circuit.png)
 
 ### Circuit Realization
+
 ![Microcontroller Circuit](/assets/projects/CircuitFSM.png)
 
 ### Advantages
@@ -387,21 +384,21 @@ void update_outputs(void) {
 ✅ **Most flexible** - Easy firmware updates via USB programmer  
 ✅ **Lowest cost** - $5-10 for complete solution  
 ✅ **Smallest footprint** - Single 28-pin chip  
-✅ **Feature-rich** - Can add UART logging, EEPROM storage, encryption  
+✅ **Real-time feedback** - LCD displays current state during operation  
 ✅ **Low power** - Sleep modes available (<1mW idle)  
 
 ### Disadvantages
 
 ❌ **Requires programming** - C knowledge necessary  
 ❌ **Software bugs possible** - Unlike pure hardware  
-❌ **Slower response** - ~100μs vs <10ns for discrete logic  
+❌ **Slower response** - ~100us vs <10ns for discrete logic  
 ❌ **Development tools** - Need MPLAB X IDE and PICkit programmer  
 
 ### Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Response Time | ~100 μs |
+| Response Time | ~100 us |
 | Power Consumption | 10-30 mW active, <1 mW sleep |
 | Component Count | 1 IC + LCD + passives |
 | Cost | $5-10 |
@@ -411,6 +408,8 @@ void update_outputs(void) {
 
 ## Implementation 4: CPLD (ATF750C + WinCUPL)
 
+The CPLD bridges the gap between discrete logic and a microcontroller — reconfigurable like software but executing at hardware speed. State transitions are described in WinCUPL and compiled directly into the chip's logic fabric.
+
 ### Hardware Platform
 
 **CPLD:** Atmel ATF750C-10JC (44-pin PLCC)
@@ -419,7 +418,7 @@ void update_outputs(void) {
 
 **External Timer:** CD4541BE CMOS Programmable Timer
 - Provides 3-second timeout for unlock sequence
-- RC time constant: R=1MΩ, C=3.3μF
+- RC time constant: R=1MOhm, C=3.3uF
 
 ### WinCUPL State Machine Code
 
@@ -456,43 +455,43 @@ $define S3  'b'111    /* Side Door Open:  DD=1 AD=1 SD=1 */
 SEQUENCE state {
     
     PRESENT S0
-        IF U NEXT S1;       /* Unlock → Driver unlocked */
+        IF U NEXT S1;       /* Unlock pressed - Driver unlocked */
         DEFAULT NEXT S0;
     
     PRESENT S1
-        IF L NEXT S0;       /* Lock → All locked */
-        IF U & !TO NEXT S2; /* Unlock (within timeout) → All unlocked */
-        IF TO NEXT S0;      /* Timeout → All locked */
+        IF L NEXT S0;       /* Lock pressed - All locked */
+        IF U & !TO NEXT S2; /* Unlock within timeout - All unlocked */
+        IF TO NEXT S0;      /* Timeout expired - All locked */
         DEFAULT NEXT S1;
     
     PRESENT S2
-        IF L NEXT S0;       /* Lock → All locked */
-        IF S NEXT S3;       /* Side door open → Indicator on */
+        IF L NEXT S0;       /* Lock pressed - All locked */
+        IF S NEXT S3;       /* Side door opened */
         DEFAULT NEXT S2;
     
     PRESENT S3
-        IF L NEXT S0;       /* Lock → All locked */
-        IF !S NEXT S2;      /* Side door closed → All unlocked */
+        IF L NEXT S0;       /* Lock pressed - All locked */
+        IF !S NEXT S2;      /* Side door closed - All unlocked */
         DEFAULT NEXT S3;
 }
 
 /* TIMER CONTROL OUTPUT */
-/* Timer enabled (running) only in State S1 */
+/* Timer enabled only in State S1 */
 TMR = (state:S1);
 ```
 
 ### CD4541BE Timer Configuration
 
 **Pin Connections:**
-- Pin 3 (CLK): RC oscillator (R=1MΩ, C=3.3μF → ~3.3s timeout)
+- Pin 3 (CLK): RC oscillator (R=1MOhm, C=3.3uF, ~3.3s timeout)
 - Pin 5 (!MR): Connected to CPLD TMR output (active low reset)
 - Pin 7 (Q): Timeout output to CPLD TO input
 - Pin 10 (AUTO/!MAN): Tied to GND (auto-trigger mode)
 
 **Operation:**
-- When TMR=LOW (State S1): Timer disabled, Q=LOW
-- When TMR=HIGH (other states): Timer running, Q goes HIGH after 3.3s
-- Creates 3-second window for second unlock press
+- When TMR=LOW (State S1): Timer running, Q goes HIGH after 3.3s
+- When TMR=HIGH (other states): Timer disabled, Q=LOW
+- Creates a 3-second window for the second unlock press
 
 ### Circuit Schematic
 
@@ -511,7 +510,7 @@ TMR = (state:S1);
 ❌ **Learning curve** - WinCUPL Boolean equation syntax  
 ❌ **Programmer required** - Need Atmel-ICE or equivalent  
 ❌ **Limited I/O** - Fewer pins than microcontroller  
-❌ **External timer** - CD4541BE adds complexity  
+❌ **External timer** - CD4541BE adds complexity for long delays  
 
 ### Performance Metrics
 
@@ -531,7 +530,7 @@ TMR = (state:S1);
 
 | Criteria | Discrete Logic | LabVIEW/myDAQ | Microcontroller | CPLD |
 |----------|---------------|---------------|-----------------|------|
-| **Response Time** | <10 ns | ~1 ms | ~100 μs | <50 ns |
+| **Response Time** | <10 ns | ~1 ms | ~100 us | <50 ns |
 | **Power (Active)** | 100 mW | High (PC) | 30 mW | 20 mW |
 | **Power (Sleep)** | 100 mW | N/A | <1 mW | 20 mW |
 | **Component Cost** | $10-15 | $200-300 | $5-10 | $15-25 |
@@ -544,73 +543,36 @@ TMR = (state:S1);
 ### Engineering Tradeoffs
 
 **Cost vs. Flexibility:**
-Discrete logic offers lowest initial cost but zero flexibility post-implementation. Microcontroller adds ~$5 but provides unlimited firmware updates.
+Discrete logic offers the lowest initial cost but zero flexibility post-implementation. The microcontroller adds roughly $5 but allows unlimited firmware updates without any hardware changes.
 
 **Speed vs. Power:**
-Discrete logic and CPLD achieve fastest response but consume more static power. Microcontroller offers best power efficiency with sleep modes.
+Discrete logic and the CPLD achieve the fastest response times but consume more static power. The microcontroller offers the best power efficiency through hardware sleep modes.
 
 **Development Time vs. Complexity:**
-LabVIEW enables fastest prototyping but unsuitable for production. Microcontroller balances development speed with deployment viability.
+LabVIEW enables the fastest initial prototype but cannot be deployed to a standalone system. The microcontroller balances development speed with real-world deployment viability.
 
 ---
 
 ## Lessons Learned
 
-### Technical Insights
-
 **State Machine Design:**
-- Same functional specification implemented four completely different ways
-- State encoding differs by technology: flip-flops, graphical diagrams, C enums, Boolean equations
-- Timing requirements (3-second timeout) handled differently across platforms
+Implementing the same specification four different ways made it clear how much the underlying technology shapes the design approach. State encoding, timing management, and debugging all look completely different depending on whether you are working in hardware, firmware, or graphical tools.
 
-**Implementation Strategies:**
-- **Discrete logic:** Requires Boolean minimization and careful wiring
-- **LabVIEW:** Visual state diagram maps directly to code
-- **Microcontroller:** Software timers provide precise timeout control
-- **CPLD:** External timer IC needed for long delays (CPLD lacks built-in long timers)
+**Choosing the Right Tool:**
+There is no universal best implementation. The right choice depends on what the application actually requires:
 
-### Engineering Philosophy
+- **Production deployment** — Microcontroller (cost, flexibility, size)
+- **Absolute fastest response** — Discrete logic or CPLD (hardware speed)
+- **Rapid prototyping** — LabVIEW (visual programming, built-in debugging)
+- **Learning fundamentals** — Discrete logic (teaches Boolean logic from the ground up)
+- **Field reconfigurability** — CPLD or microcontroller
 
-**There is no universal "best" implementation** - optimal choice depends on application constraints:
-
-- **Production deployment?** → Microcontroller (cost, flexibility, size)
-- **Absolute fastest response?** → Discrete logic or CPLD (hardware speed)
-- **Rapid prototyping?** → LabVIEW (visual programming, debugging)
-- **Learning fundamentals?** → Discrete logic (teaches Boolean logic)
-- **Field reconfigurability?** → CPLD or microcontroller
-
-Real engineering requires matching technology to requirements, not defaulting to familiar tools.
+Real engineering means matching the technology to the requirements, not defaulting to whatever is most familiar.
 
 ---
-
-## Future Enhancements
-
-**Production Features:**
-- Rolling code encryption (prevent replay attacks)
-- Remote key fob RF communication (315/433 MHz)
-- Auto-lock timeout (configurable via EEPROM)
-- Panic button (activate horn and lights)
-- Battery voltage monitoring
-- Tamper detection
-
-**Additional Implementations:**
-- Arduino version (for comparison with dsPIC)
-- FPGA implementation (Xilinx Artix-7)
-- Raspberry Pi with GUI (touchscreen interface)
-- ESP32 with WiFi/Bluetooth remote control
-
 
 ## Conclusion
 
-This comparative study demonstrates that effective engineering requires selecting the right tool for the job, not defaulting to familiar technologies. While discrete logic provides unmatched speed and LabVIEW excels at prototyping, the **microcontroller emerged as the optimal solution for production deployment**, balancing cost ($5-10), flexibility (firmware updates), size (single chip), and power efficiency.
+This project demonstrated that the same functional specification can be realized in fundamentally different ways, each with distinct tradeoffs in speed, cost, flexibility, and development effort. While discrete logic provides unmatched response time and LabVIEW excels at rapid prototyping, the microcontroller proved to be the most practical solution for production deployment — balancing low cost, small footprint, firmware flexibility, and real-time LCD feedback.
 
-The project reinforced that modern embedded systems benefit from software programmability - the ability to fix bugs, add features, and adapt to changing requirements without hardware modifications far outweighs the modest cost premium over pure hardware solutions.
-
-Understanding when to use discrete logic (education, ultra-low latency), CPLDs (reconfigurable hardware logic), microcontrollers (general embedded systems), or graphical tools (rapid prototyping) is a critical skill for embedded systems engineers.
-
----
-
-*Project completed as part of EE 200 - Digital Logic Design at Penn State University, Spring 2024.*
-```
-
-
+The core takeaway is that understanding when to use each technology is just as important as knowing how to use it.
