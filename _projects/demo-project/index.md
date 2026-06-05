@@ -13,7 +13,7 @@ skills:
   - Comparative Engineering Analysis
   - System-Level Design
   - Hardware Description Languages
-main-image: "{{ site.baseurl }}/assets/projects/discrete-logic-circuit.png"
+main-image: /discrete-logic-circuit.png
 
 ---
 
