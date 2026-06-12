@@ -34,11 +34,11 @@ v
 
 ```
 
-* **Synthetic Data Generation:** Generates a stable baseline CSI magnitude ($45 \text{ dB}$) at $1000 \text{ Hz}$ sampling rate. Human motion is modeled via overlaid low-frequency wave shifts ($1.5 \text{ Hz}$ and $3.0 \text{ Hz}$) between $t = 2.5\text{s}$ and $t = 4.5\text{s}$.
-* **Noise Injection:** Applies White Gaussian Noise manually derived to hit a strict target $18 \text{ dB}$ Signal-to-Noise Ratio (SNR).
-* **DSP Smoothing:** Employs a recursive first-order Exponential Moving Average (EMA) low-pass filter ($\alpha = 0.05$).
+* **Synthetic Data Generation:** Generates a stable baseline CSI magnitude at 1000 Hz sampling rate. Human motion is modeled via overlaid low-frequency wave shifts (1.5 Hz and 3.0 Hz) between t = 2.5s and t = 4.5s.
+* **Noise Injection:** Applies White Gaussian Noise manually derived to hit a strict target 18 dB Signal-to-Noise Ratio (SNR).
+* **DSP Smoothing:** Employs a recursive first-order Exponential Moving Average (EMA) low-pass filter (alpha = 0.05).
 * **Feature Extraction:** Calculates rolling standard deviation using a sliding 200ms time-window to isolate signal variance.
-* **Thresholding & Decision Engine:** Runs an automated binary check against an empirical threshold ($1.0$) to flag real-time intrusions.
+* **Thresholding & Decision Engine:** Runs an automated binary check against an empirical threshold (1.0) to flag real-time intrusions.
 
 ---
 
@@ -50,11 +50,10 @@ Execute the script locally in MATLAB to generate the live interactive plot windo
 The raw, noisy wireless signal stream is aggressively smoothed by the embedded-ready EMA filter, stripping high-frequency channel noise while preserving the macro-scale motion curve.
 
 ### B. Variance Profiling & Thresholding
-By calculating local signal standard deviation ($\sigma$), the framework quantifies environmental instability. The system automatically triggers when localized variance breaches the $1.0\text{ dB}$ threshold line.
+By calculating local signal standard deviation, the framework quantifies environmental instability. The system automatically triggers when localized variance breaches the 1.0 dB threshold line.
 
 ### C. Binary Decision Engine
 The end-to-end framework maps variance anomalies into a definitive, actionable binary alert state, successfully isolating human interaction from static environmental background noise.
-
 ![Simulation Plot Output](simulation-output.png)
 
 ---
@@ -187,7 +186,8 @@ fprintf('====================================================\n');
 2. Download or clone this workspace.
 3. Open MATLAB and navigate to the project directory.
 4. Run the file by clicking Run or entering the following command in the Command Window:
-```matlab
+
+```
 wifi_csi_motion_simulator
 
 ```
