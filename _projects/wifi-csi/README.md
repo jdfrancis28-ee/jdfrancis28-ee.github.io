@@ -36,6 +36,15 @@ v
 |  (Static vs. ALARM)   |
 +-----------------------+
 '''
+
+
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│   IF    │───>│   ID    │───>│   EX    │───>│   MEM   │───>│   WB    │
+│ Fetch   │    │ Decode  │    │ Execute │    │ Memory  │    │ Write   │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+     │              │              │              │              │
+     └──────────────┴──────────────┴──────────────┴──────────────┘
+                         Forwarding Paths
 1. **Synthetic Data Generation:** Generates a stable baseline CSI magnitude ($45 \text{ dB}$) at $1000 \text{ Hz}$ sampling rate. Human motion is modeled via overlaid low-frequency wave shifts ($1.5 \text{ Hz}$ and $3.0 \text{ Hz}$) between $t = 2.5\text{s}$ and $t = 4.5\text{s}$.
 2. **Noise Injection:** Applies White Gaussian Noise manually derived to hit a strict target $18 \text{ dB}$ Signal-to-Noise Ratio (SNR).
 3. **DSP Smoothing:** Employs a recursive first-order Exponential Moving Average (EMA) low-pass filter ($\alpha = 0.05$).
