@@ -12,7 +12,7 @@ skills:
   - Statistical Modeling
   - Algorithm Optimization
   - Hardware-Constrained Design
-main-image: /simulation-output.png
+main-image: /1753237778531.png
 ---
 ## System Architecture & Workflow
 
