@@ -55,7 +55,7 @@ By calculating local signal standard deviation ($\sigma$), the framework quantif
 ### C. Binary Decision Engine
 The end-to-end framework maps variance anomalies into a definitive, actionable binary alert state, successfully isolating human interaction from static environmental background noise.
 
-![Simulation Plot Output](simulation_output.png)
+![Simulation Plot Output](simulation-output.png)
 
 ---
 
