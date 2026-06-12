@@ -12,7 +12,7 @@ skills:
   - Statistical Modeling
   - Algorithm Optimization
   - Hardware-Constrained Design
-main-image: /simulation_output.png
+main-image: /simulation-output.png
 ---
 
 An embedded-ready Digital Signal Processing (DSP) and feature extraction pipeline built from scratch in MATLAB to detect human motion using WiFi Channel State Information (CSI) amplitude tracking. 
