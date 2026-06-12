@@ -24,7 +24,7 @@ An embedded-ready Digital Signal Processing (DSP) and feature extraction pipelin
 ## 🛠️ System Architecture & Workflow
 
 The simulation models a real-world edge-computing system processing raw wireless signal disruptions caused by human movement.
-
+'''
 +--------------------+      +-------------------------+      +-----------------------+
 |  Simulated WiFi    | ---> | Embedded EMA Filter     | ---> | Rolling Variance      |
 |  CSI Noise Stream  |      | (Low-Pass Smoothing)    |      | (Feature Extraction)  |
@@ -35,6 +35,7 @@ v
 | Binary Classification |
 |  (Static vs. ALARM)   |
 +-----------------------+
+'''
 1. **Synthetic Data Generation:** Generates a stable baseline CSI magnitude ($45 \text{ dB}$) at $1000 \text{ Hz}$ sampling rate. Human motion is modeled via overlaid low-frequency wave shifts ($1.5 \text{ Hz}$ and $3.0 \text{ Hz}$) between $t = 2.5\text{s}$ and $t = 4.5\text{s}$.
 2. **Noise Injection:** Applies White Gaussian Noise manually derived to hit a strict target $18 \text{ dB}$ Signal-to-Noise Ratio (SNR).
 3. **DSP Smoothing:** Employs a recursive first-order Exponential Moving Average (EMA) low-pass filter ($\alpha = 0.05$).
