@@ -13,11 +13,11 @@ title: Jacob Francis's Portfolio # This is what shows up in the tab of the brows
 
 # Hero Section
 name: Jacob Francis
-headline: Electrical Engineering Student
+headline: Electrical Engineering Student | Hardware & FPGA Design
 description: >- # dont remove this line. this will ignore all new lines until the next section
-  Electrical Engineering student at Morgan State University (Expected graduation May 2027). 
-  Experience in circuit design, embedded systems, and engineering project management through 
-  academic coursework and industry internships at Textron Systems and Yale NSLC.
+  Electrical Engineering student at Morgan State University (Cybersecurity Concentration), expected graduation May 2028.
+Experience spans circuit design, FPGA/digital design, and hardware security, built through coursework, personal
+projects, and industry roles at Textron Systems, Voith Hydro, and Handshake AI.
 
 # Place your profile image in /assets/images/profile-image/folder and edit the file name
 profile_image: ./assets/images/profile-image/headshot.jpeg
