@@ -1,20 +1,168 @@
 ---
-# Feel free to add content and custom Front Matter to this file.
-# To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-
 layout: wrapper
 ---
 
-{% include hero.html%}
+<section class="hero-modern">
+  <div class="hero-copy">
+    <div class="eyebrow">ELECTRICAL ENGINEERING · EMBEDDED SYSTEMS · DIGITAL HARDWARE</div>
+    <h1>Jacob Francis</h1>
+    <h2>I design, simulate, and validate hardware—from RTL and embedded systems to PCB-level engineering.</h2>
+    <p class="hero-summary">Electrical Engineering student at Morgan State University with a cybersecurity concentration. I build across digital design, embedded systems, circuit simulation, PCB workflows, and engineering validation.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="#projects">View Projects</a>
+      <a class="button secondary" href="{{ site.resume-url }}" target="_blank" rel="noopener noreferrer">Resume</a>
+      <a class="button ghost" href="https://www.linkedin.com/in/{{ site.external-links.linkedin }}/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    </div>
+    <div class="hero-meta">
+      <span>Morgan State University</span>
+      <span>B.S. Electrical Engineering</span>
+      <span>Cybersecurity Concentration</span>
+      <span>Expected May 2028</span>
+    </div>
+  </div>
 
+  <div class="hero-visual">
+    <div class="portrait-shell">
+      <img src="{{ site.profile_image }}" alt="Jacob Francis">
+    </div>
+    <div class="availability-card">
+      <span class="status-dot"></span>
+      <div>
+        <strong>Open to 2027 opportunities</strong>
+        <p>Embedded systems · digital design · hardware security</p>
+      </div>
+    </div>
+  </div>
+</section>
 
+<section class="section" id="projects">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">SELECTED WORK</span>
+      <h2>Engineering Projects</h2>
+    </div>
+    <a class="text-link" href="/projects/">View all projects →</a>
+  </div>
 
-<div class="arrow"> 
-    <a href="#projects">
-        More About Me
-    <i class="fa-solid fa-angles-down"></i>
-    </a> 
-</div>
-{% include projects.html%}
-{% include skills.html%}
-{% include contact.html%}
+  <div class="project-feature-grid">
+    {% assign featured = site.projects | sort: "title" %}
+    {% for item in featured %}
+      <a class="project-feature-card" href="{{ item.url }}">
+        {% assign folder_path = item.path | split: "/" | slice: 0, 2 | join: "/" %}
+        {% assign image_path = "/" | append: folder_path | append: item['main-image'] %}
+        <div class="project-image-wrap">
+          <img src="{{ image_path }}" alt="{{ item.title }}">
+        </div>
+        <div class="project-feature-body">
+          <div class="project-label">CASE STUDY</div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+          <div class="project-tags">
+            {% for skill in item.skills limit: 4 %}
+              <span>{{ skill }}</span>
+            {% endfor %}
+          </div>
+          <div class="project-arrow">View project <span>↗</span></div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section experience-section" id="experience">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">EXPERIENCE</span>
+      <h2>Engineering in practice</h2>
+    </div>
+  </div>
+
+  <div class="experience-list">
+    <article class="experience-row">
+      <div class="experience-date">2026 — PRESENT</div>
+      <div class="experience-main">
+        <h3>Hardware Engineering AI Specialist <span>· Handshake AI</span></h3>
+        <p>Review AI-generated hardware designs and engineering outputs using KiCad, ngspice, LTspice, and Qucs-S, checking topology, connectivity, component choices, simulation behavior, and design quality.</p>
+        <div class="experience-tags"><span>KiCad</span><span>ngspice</span><span>LTspice</span><span>Qucs-S</span></div>
+      </div>
+    </article>
+
+    <article class="experience-row">
+      <div class="experience-date">SUMMER 2026</div>
+      <div class="experience-main">
+        <h3>Project Planning Engineer <span>· Voith Hydro</span></h3>
+        <p>Designed 3D electrical and mechanical equipment layouts in Solid Edge for hydroelectric modernization work and developed material-handling plans for 10,000+ components and parts.</p>
+        <div class="experience-tags"><span>Solid Edge</span><span>Electrical Layout</span><span>BOM Review</span><span>Planning</span></div>
+      </div>
+    </article>
+
+    <article class="experience-row">
+      <div class="experience-date">2026 — PRESENT</div>
+      <div class="experience-main">
+        <h3>Engineering Teaching Assistant <span>· Morgan State University</span></h3>
+        <p>Support first-year engineering students through labs, technical problem solving, grading, and hands-on design work.</p>
+        <div class="experience-tags"><span>Mentoring</span><span>Engineering Labs</span><span>Technical Communication</span></div>
+      </div>
+    </article>
+
+    <article class="experience-row">
+      <div class="experience-date">2024</div>
+      <div class="experience-main">
+        <h3>Engineering Team Advisor <span>· National Student Leadership Conference</span></h3>
+        <p>Guided student engineering teams through Arduino-based RC vehicle builds and iterative hardware validation.</p>
+        <div class="experience-tags"><span>Arduino</span><span>Prototyping</span><span>Leadership</span></div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section capabilities-section" id="skills">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">TOOLKIT</span>
+      <h2>Core capabilities</h2>
+    </div>
+  </div>
+
+  <div class="capability-grid">
+    <div class="capability-card">
+      <span class="capability-number">01</span>
+      <h3>Digital & Embedded</h3>
+      <p>Verilog · FPGA/CPLD · Xilinx Vivado · Embedded C · dsPIC33EP · MPLAB X · WinCUPL</p>
+    </div>
+    <div class="capability-card">
+      <span class="capability-number">02</span>
+      <h3>PCB & Hardware</h3>
+      <p>KiCad · Altium Designer · Schematic review · PCB layout · Soldering · Oscilloscope · DMM</p>
+    </div>
+    <div class="capability-card">
+      <span class="capability-number">03</span>
+      <h3>Simulation & Analysis</h3>
+      <p>LTspice · Qucs-S · ngspice · MATLAB · circuit validation · transient analysis · signal processing</p>
+    </div>
+    <div class="capability-card">
+      <span class="capability-number">04</span>
+      <h3>Mechanical & Systems</h3>
+      <p>Solid Edge · equipment layout · engineering tradeoffs · technical documentation · hardware validation</p>
+    </div>
+  </div>
+</section>
+
+<section class="section about-strip" id="about">
+  <div>
+    <span class="section-kicker">ABOUT</span>
+    <h2>Hardware-first engineering, with security in mind.</h2>
+  </div>
+  <p>I’m building depth at the intersection of embedded systems, digital hardware, and cybersecurity. I’m most interested in work where I can understand the system from the circuit and RTL level upward—not just treat hardware as a black box.</p>
+</section>
+
+<section class="contact-modern" id="contact">
+  <span class="section-kicker">LET'S CONNECT</span>
+  <h2>Interested in my work?</h2>
+  <p>Explore the project case studies, review my resume, or connect with me on LinkedIn and GitHub.</p>
+  <div class="hero-actions">
+    <a class="button primary" href="https://www.linkedin.com/in/{{ site.external-links.linkedin }}/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <a class="button secondary" href="https://github.com/{{ site.external-links.github }}/" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a class="button ghost" href="{{ site.resume-url }}" target="_blank" rel="noopener noreferrer">Resume</a>
+  </div>
+</section>
