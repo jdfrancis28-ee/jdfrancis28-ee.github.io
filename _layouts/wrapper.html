@@ -1,34 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/syntax.css">
-
-    <script src="{{ '/assets/js/script.js' | relative_url }}"></script>
-
-    
-    <title>{{ site.title }}</title>
-    
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Jacob Francis — Electrical Engineering portfolio focused on embedded systems, digital hardware, PCB design, simulation, and hardware security.">
+  <meta name="theme-color" content="#f6f7f9">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/syntax.css">
+  <script defer src="{{ '/assets/js/script.js' | relative_url }}"></script>
+  <title>{{ page.title | default: site.title }}</title>
 </head>
 <body>
-    <!-- NAVBAR -->
-     {% include navbar.html%}
-
-     <div class="page">{{content}}</div>
-
-     
+  {% include navbar.html %}
+  <main class="page">{{ content }}</main>
+  {% include footer.html %}
 </body>
-
-    {% include footer.html%}
 </html>
